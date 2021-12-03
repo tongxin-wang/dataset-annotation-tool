@@ -53,7 +53,7 @@
                 auto-grow
                 :label="'Modified Caption ' + (capSelected + 1)"
                 rows="2"
-                :value="modifiedCaptions[capSelected]"
+                v-model="modifiedCaptions[capSelected]"
               ></v-textarea>
             </v-row>
             <v-row>
@@ -61,45 +61,53 @@
                 v-for="(token, i) in txtTokens"
                 :key="i"
                 link
+                :color="negTokenIdxes[capSelected].indexOf(i) > -1 ? 'red' : ''"
+                :text-color="
+                  negTokenIdxes[capSelected].indexOf(i) > -1 ? 'white' : ''
+                "
                 class="ma-1"
+                @click="chooseNegToken(capSelected, i)"
               >
                 {{ token }}
               </v-chip>
             </v-row>
+            <!-- <hr size=1 class="mt-3" style="border: 1px dashed #000" /> -->
+            <hr size="1" class="mt-3" style="border-style: dashed" />
             <v-row>
-              <v-col cols="8">
-                <!-- <v-list rounded class="grey lighten-4 mt-2" id="caption-list">
-                  <v-subheader>Captions</v-subheader>
-                  <v-list-item-group v-model="capSelected" color="primary">
-                    <v-list-item v-for="(cap, i) in captions" :key="i">
-                      <v-list-item-content>
-                        <v-list-item-title v-text="cap"></v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list-item-group>
-                </v-list> -->
-                <v-select
-                  v-model="errorSelected[capSelected]"
-                  :items="errorItems"
-                  filled
-                  label="Error type"
-                ></v-select>
-              </v-col>
-              <v-col cols="4">
-                <v-checkbox
-                  v-model="completedStatus[capSelected]"
-                  label="Completed"
-                  color="success"
-                  value="success"
-                  hide-details
-                ></v-checkbox>
-              </v-col>
+              <div class="grey--text font-weight-light mt-3">Error Type</div>
+            </v-row>
+            <v-row>
+              <v-radio-group
+                class="ma-0"
+                v-model="errorSelected[capSelected]"
+                row
+              >
+                <v-radio
+                  v-for="(error, i) in errorItems"
+                  :key="i"
+                  :label="error"
+                  :value="error"
+                ></v-radio>
+              </v-radio-group>
+            </v-row>
+            <v-row>
+              <div class="grey--text font-weight-light">Completed State</div>
+            </v-row>
+            <v-row>
+              <v-switch
+                v-model="completedState[capSelected]"
+                class="ma-0"
+                inset
+                :label="
+                  completedState[capSelected] ? 'completed' : 'uncompleted'
+                "
+              ></v-switch>
             </v-row>
             <v-row>
               <v-btn depressed class="ma-2" color="primary"> Save </v-btn>
               <v-spacer></v-spacer>
               <v-btn depressed class="ma-2" color="primary"> Next </v-btn>
-              <v-btn
+              <!-- <v-btn
                 depressed
                 class="ma-2"
                 color="primary"
@@ -112,7 +120,7 @@
               </v-btn>
               <v-btn depressed class="ma-2" color="primary" @click="clearRect">
                 Clear Rect
-              </v-btn>
+              </v-btn> -->
             </v-row>
           </v-col>
         </v-row>
@@ -151,7 +159,6 @@
 
 <script>
 import axios from 'axios'
-import path from 'path'
 
 export default {
   data: () => ({
@@ -168,7 +175,7 @@ export default {
       'Entity error',
       'Entity error'
     ],
-    completedStatus: [false, false, false, false, false],
+    completedState: [false, false, false, false, false],
     data: {},
     idList: [],
     idNum: 1,
@@ -196,6 +203,7 @@ export default {
       'A dirt path with a young person on a motor bike rests to the foreground of a verdant area with a bridge and a background of cloud-wreathed mountains .',
       'A man in a red shirt and a red hat is on a motorcycle on a hill side .'
     ],
+    negTokenIdxes: [[], [], [], [], []],
     capSelected: 0,
     imgWidth: 0,
     imgHeight: 0,
@@ -260,38 +268,10 @@ export default {
     }
   },
   computed: {
-    pageIndex: function () {
-      return this.page - 1
-    },
-    queryImages: function () {
-      if (Object.keys(this.data).length === 0) {
-        return []
-      } else {
-        return this.data[this.idList[this.pageIndex]]['query_images']
-      }
-    },
-    galleryImages: function () {
-      if (Object.keys(this.data).length === 0) {
-        return []
-      } else {
-        return this.data[this.idList[this.pageIndex]]['gallery_images']
-      }
-    },
-    undoBtnDisabled: function () {
-      if (this.dataRequested && this.idNum !== 0) {
-        return this.records[this.pageIndex].length === 0
-      }
-      return true
-    },
-    saveBtnDisabled: function () {
-      if (this.dataRequested && !this.saveLoading && this.idNum !== 0) {
-        return this.records[this.pageIndex].length === 0
-      }
-      return true
-    },
     txtTokens: function () {
-      // console.log('modifiedCaptions changed')
-      return this.modifiedCaptions[this.capSelected].split(' ')
+      return typeof this.capSelected !== 'undefined'
+        ? this.modifiedCaptions[this.capSelected].split(' ')
+        : []
     }
     // listenChange: function () {
     //   const { canvasWidth, bbxBottomRightPoint } = this
@@ -368,54 +348,14 @@ export default {
         )
       )
     },
-    deleteImage: function (img) {
-      let index =
-        this.data[this.idList[this.pageIndex]]['gallery_images'].indexOf(img)
-      delete this.data[this.idList[this.pageIndex]]['gallery_images'][index]
-      let record = {}
-      record['id'] = this.idList[this.pageIndex]
-      record['index'] = index
-      record['image'] = img
-      this.records[this.pageIndex].push(record) //保存删除操作记录
-      this.$forceUpdate()
-    },
-    undo: function () {
-      let record = this.records[this.pageIndex].pop()
-      this.data[record['id']]['gallery_images'][record['index']] =
-        record['image']
-      this.$forceUpdate()
-    },
-    save: function () {
-      let recordData = {}
-      recordData['id'] = this.idList[this.pageIndex]
-      recordData['delete_images'] = []
-      this.records[this.pageIndex].forEach((record) =>
-        recordData['delete_images'].push(record['image'])
-      )
-      this.saveLoading = true
-      axios
-        .post(this.baseUrl + '/save', recordData)
-        .then(
-          (response) => (
-            (this.retInfo = response.data),
-            (this.saveSnackbar = true),
-            (this.saveLoading = false)
-          )
-        )
-      this.records[this.pageIndex].splice(
-        0,
-        this.records[this.pageIndex].length
-      ) //清空当前id记录
-    },
-    isMatched: function (img) {
-      let flag = false
-      if (
-        img !== undefined &&
-        path.basename(img).split('_')[1] == this.idList[this.pageIndex]
-      ) {
-        flag = true
+    chooseNegToken: function (capSelected, negTokenIdx) {
+      let idx = this.negTokenIdxes[capSelected].indexOf(negTokenIdx)
+      if (idx > -1) {
+        //delete existed choosed token item
+        this.negTokenIdxes[capSelected].splice(idx, 1)
+      } else {
+        this.negTokenIdxes[capSelected].push(negTokenIdx)
       }
-      return flag
     },
     changeImage: function () {
       this.imgUrl =
