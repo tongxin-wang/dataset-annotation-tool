@@ -54,6 +54,7 @@
                 :label="'Modified Caption ' + (capSelected + 1)"
                 rows="2"
                 v-model="modifiedCaptions[capSelected]"
+                @input="resetSelectedNegTokens(capSelected)"
               ></v-textarea>
             </v-row>
             <v-row>
@@ -356,6 +357,11 @@ export default {
       } else {
         this.negTokenIdxes[capSelected].push(negTokenIdx)
       }
+    },
+    resetSelectedNegTokens: function(capSelected) {
+      console.log("xiugaileo")
+      this.negTokenIdxes[capSelected].splice(0, this.negTokenIdxes[capSelected].length)
+      // this.$forceUpdate()
     },
     changeImage: function () {
       this.imgUrl =
