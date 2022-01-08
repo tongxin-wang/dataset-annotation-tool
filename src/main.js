@@ -5,6 +5,8 @@ import vuetify from './plugins/vuetify';
 
 Vue.config.productionTip = false
 
+Vue.prototype.$api = require('./utils/api')
+
 new Vue({
   router,
   vuetify,

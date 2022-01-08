@@ -25,6 +25,65 @@
             </v-img> -->
             <canvas id="canvas"></canvas>
             <v-list rounded class="grey lighten-4 mt-2" id="caption-list">
+              <!-- <v-subheader>Captions</v-subheader>
+              <v-list-item-group
+                v-model="capSelected"
+                mandatory
+                color="primary"
+              >
+                <v-list-item v-for="(cap, i) in captions" :key="i">
+                  <v-list-item-content>
+                    <v-list-item-title v-text="cap"></v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group> -->
+            </v-list>
+          </v-col>
+
+          <v-col cols="6">
+            <v-row>
+              <div class="grey--text font-weight-light">Captions</div>
+            </v-row>
+            <v-item-group mandatory>
+              <v-row dense style="margin-left: -16px; margin-bottom: 12px">
+                <v-col
+                  v-for="(cap, i) in captions"
+                  :key="i"
+                  @click="changeSelectedCap(i)"
+                >
+                  <v-item v-slot="{ active, toggle }">
+                    <v-card
+                      class="mx-auto caption-card"
+                      :color="active ? 'primary' : ''"
+                      outlined
+                      @click="toggle"
+                    >
+                      <v-card-title class="text-subtitle-1 font-weight-thin">
+                        <v-icon
+                          dense
+                          left
+                          v-show="completedState[i]"
+                          :color="active ? 'green lighten-2' : 'green'"
+                          >mdi-checkbox-marked-circle-outline</v-icon
+                        >
+                        <span :class="active ? 'white--text' : ''">{{
+                          'Caption ' + (i + 1)
+                        }}</span>
+                      </v-card-title>
+
+                      <v-card-subtitle
+                        class="text-caption"
+                        :class="active ? 'white--text' : ''"
+                      >
+                        {{ truncateCap(cap) }}
+                      </v-card-subtitle>
+                    </v-card>
+                  </v-item>
+                </v-col>
+              </v-row>
+            </v-item-group>
+
+            <!-- <v-list rounded class="grey lighten-4 mt-2" id="caption-list">
               <v-subheader>Captions</v-subheader>
               <v-list-item-group
                 v-model="capSelected"
@@ -37,10 +96,8 @@
                   </v-list-item-content>
                 </v-list-item>
               </v-list-item-group>
-            </v-list>
-          </v-col>
+            </v-list> -->
 
-          <v-col cols="6">
             <v-row>
               <v-textarea
                 filled
@@ -80,7 +137,7 @@
                   style="user-select: text"
                   @click="showExtraDetailInfo"
                 >
-                Token
+                  Token
                   <v-icon small right>mdi-pencil-plus-outline</v-icon>
                 </v-chip>
                 <v-chip
@@ -92,9 +149,9 @@
                 >
                   <v-text-field
                     v-model="extraDetailInfo['inputValue']"
-                    :rules="inputTokenRules"
-                    style="width: 50px"
+                    style="width: 100px"
                     @change="addTokenInFrontOfModifiedCap"
+                    @blur="addTokenInFrontOfModifiedCap"
                   ></v-text-field>
                 </v-chip>
               </template>
@@ -251,9 +308,9 @@
                   >
                     <v-text-field
                       v-model="selectedDetailInfo['inputValue']"
-                      :rules="inputTokenRules"
-                      style="width: 50px"
+                      style="width: 100px"
                       @change="addTokenToModifiedCap"
+                      @blur="addTokenToModifiedCap"
                     ></v-text-field>
                   </v-chip>
                 </template>
@@ -340,9 +397,25 @@
               ></v-switch>
             </v-row>
             <v-row>
-              <v-btn depressed class="ma-2" color="primary"> Save </v-btn>
-              <v-spacer></v-spacer>
-              <v-btn depressed class="ma-2" color="primary"> Next </v-btn>
+              <v-btn
+                depressed
+                class="ma-2"
+                color="primary"
+                @click="saveData(false)"
+              >
+                Save
+              </v-btn>
+              <v-btn
+                depressed
+                class="ma-2"
+                color="primary"
+                @click="saveData(true)"
+              >
+                Next
+              </v-btn>
+              <v-btn depressed class="ma-2" color="primary" @click="clearRect">
+                Clear Rects
+              </v-btn>
               <!-- <v-btn
                 depressed
                 class="ma-2"
@@ -361,71 +434,28 @@
           </v-col>
         </v-row>
 
-        <v-snackbar
-          v-model="selectedDetailInfo['inputErrorSnackbar']"
-          top
-          right
-          color="red lighten-1"
-          transition="slide-x-reverse-transition"
-        >
-          {{ selectedDetailInfo['inputErrorMessage'] }}
+        <v-snackbar v-model="promptSnackbar" top timeout="3000">
+          {{ prompt }}
           <template v-slot:action="{ attrs }">
             <v-btn
               text
+              color="pink"
               v-bind="attrs"
-              @click="selectedDetailInfo['inputErrorSnackbar'] = false"
+              @click="promptSnackbar = false"
             >
               Close
             </v-btn>
           </template>
         </v-snackbar>
 
-        <v-snackbar
-          v-model="extraDetailInfo['inputErrorSnackbar']"
-          top
-          right
-          color="red lighten-1"
-          transition="slide-x-reverse-transition"
-        >
-          {{ extraDetailInfo['inputErrorMessage'] }}
-          <template v-slot:action="{ attrs }">
-            <v-btn
-              text
-              v-bind="attrs"
-              @click="extraDetailInfo['inputErrorSnackbar'] = false"
-            >
-              Close
-            </v-btn>
-          </template>
-        </v-snackbar>
-
-        <div class="text-center pb-0" v-show="dataRequested">
-          <v-pagination
-            v-model="page"
-            :length="idNum"
-            circle
-            color="primary"
-          ></v-pagination>
-        </div>
-
-        <v-snackbar v-model="saveSnackbar" top color="success" timeout="2000">
-          {{ retInfo }}
-
-          <template v-slot:action="{ attrs }">
-            <v-btn text v-bind="attrs" @click="saveSnackbar = false">
-              Close
-            </v-btn>
-          </template>
-        </v-snackbar>
-
-        <v-snackbar v-model="dataSnackbar" top timeout="2000">
+        <!-- <v-snackbar v-model="dataSnackbar" top timeout="2000">
           No data!
           <template v-slot:action="{ attrs }">
             <v-btn text v-bind="attrs" @click="dataSnackbar = false">
               Close
             </v-btn>
           </template>
-        </v-snackbar>
+        </v-snackbar> -->
       </div>
     </v-container>
   </div>
@@ -437,87 +467,71 @@ import axios from 'axios'
 export default {
   data: () => ({
     errorItems: [
-      'Entity error',
-      'Attribute error(Modifier)',
-      'Attribute error(Action)',
-      'Attribute error(Position)'
+      'Entity Error',
+      'Attribute Error(Modifier)',
+      'Attribute Error(Action)',
+      'Attribute Error(Position)'
     ],
-    errorSelected: [
-      'Entity error',
-      'Entity error',
-      'Entity error',
-      'Entity error',
-      'Entity error'
-    ],
-    completedState: [false, false, false, false, false],
-    data: {},
-    idList: [],
-    idNum: 1,
-    page: 1,
-    getLoading: false,
-    saveLoading: false,
-    baseUrl: 'http://172.16.2.156:8000/',
-    dataRequested: false,
-    records: [],
-    saveSnackbar: false,
-    dataSnackbar: false,
-    retInfo: '',
+    // here * num
+    errorSelected: ['Entity Error'],
+    // here * num
+    completedState: [false],
+    promptSnackbar: false,
+    prompt: '',
+    imgName: '',
     imgUrl: '',
-    backUpCaptions: [
-      '   It\'s @A man with a    red hel  met on a :small mo"ped on a dirt road .',
-      'road .',
-      'A man with a red helmet on a small moped on a dirt road .',
-      'Man riding a motor bike on a dirt road on the countryside .',
-      'A man riding on the back of a motorcycle .',
-      'A dirt path with a young person on a motor bike rests to the foreground of a verdant area with a bridge and a background of cloud-wreathed mountains .',
-      'A man in a red shirt and a red hat is on a motorcycle on a hill side .'
-    ],
-    captions: [
-      'road .',
-      'Man riding a motor bike on a dirt road on the countryside .',
-      'A man riding on the back of a motorcycle .',
-      'A dirt path with a young person on a motor bike rests to the foreground of a verdant area with a bridge and a background of cloud-wreathed mountains .',
-      'A man in a red shirt and a red hat is on a motorcycle on a hill side .'
-    ],
-    capTokens: [null, null, null, null, null],
-    modifiedCaptions: [
-      'road .',
-      'Man riding a motor bike on a dirt road on the countryside .',
-      'A man riding on the back of a motorcycle .',
-      'A dirt path with a young person on a motor bike rests to the foreground of a verdant area with a bridge and a background of cloud-wreathed mountains .',
-      'A man in a red shirt and a red hat is on a motorcycle on a hill side .'
-    ],
-    negTokenIdxes: [[], [], [], [], []],
+    // backUpCaptions: [
+    //   '   It\'s @A man with a    red hel  met on a :small mo"ped on a dirt road .',
+    //   'road .',
+    //   'A man with a red helmet on a small moped on a dirt road .',
+    //   'Man riding a motor bike on a dirt road on the countryside .',
+    //   'A man riding on the back of a motorcycle .',
+    //   'A dirt path with a young person on a motor bike rests to the foreground of a verdant area with a bridge and a background of cloud-wreathed mountains .',
+    //   'A man in a red shirt and a red hat is on a motorcycle on a hill side .'
+    // ],
+    // captions: [
+    //   'A man with a red helmet on a small moped on a dirt road .',
+    //   'Man riding a motor bike on a dirt road on the countryside .',
+    //   'A man riding on the back of a motorcycle .',
+    //   'A dirt path with a young person on a motor bike rests to the foreground of a verdant area with a bridge and a background of cloud-wreathed mountains .',
+    //   'A man in a red shirt and a red hat is on a motorcycle on a hill side .'
+    // ],
+    // modifiedCaptions: [
+    //   'A man with a red helmet on a small moped on a dirt road .',
+    //   'Man riding a motor bike on a dirt road on the countryside .',
+    //   'A man riding on the back of a motorcycle .',
+    //   'A dirt path with a young person on a motor bike rests to the foreground of a verdant area with a bridge and a background of cloud-wreathed mountains .',
+    //   'A man in a red shirt and a red hat is on a motorcycle on a hill side .'
+    // ],
+    captions: ['Good luck to anyone who reads this.'],
+    modifiedCaptions: ['Good luck to anyone who reads this.'],
+    // here * num
+    capTokens: [null],
     capSelected: 0,
     imgWidth: 0,
     imgHeight: 0,
     canvasWidth: 0,
     canvasHeight: 0,
+    capCardHeight: 0,
     img: new Image(),
     mouseDown: false,
     bbxTopLeftPoint: {},
     bbxBottomRightPoint: {},
-    bbxes: [],
-    tokensDetailInfo: [[], [], [], [], []],
+    // here * num
+    bbxes: [[]],
+    // here * num
+    tokensDetailInfo: [[]],
     selectedDetailInfo: {
       capIndex: undefined,
       tokenIndex: undefined,
       inputToken: false,
-      inputValue: '',
-      inputErrorSnackbar: false,
-      inputErrorMessage: ''
+      inputValue: ''
     },
     extraDetailInfo: {
       capIndex: undefined,
       selected: false,
-      inputValue: '',
-      inputErrorSnackbar: false,
-      inputErrorMessage: ''
-    },
-    inputTokenRules: [
-      (value) => !!value || 'Required.',
-      (value) => (value || '').indexOf(' ') < 0 || 'No spaces.'
-    ]
+      inputValue: ''
+    }
   }),
   watch: {
     canvasWidth: function () {
@@ -529,14 +543,20 @@ export default {
       ctx.drawImage(this.img, 0, 0, this.canvasWidth, this.canvasHeight)
       ctx.strokeStyle = 'red'
       ctx.lineWidth = 1
-      ctx.strokeRect(
-        this.bbxTopLeftPoint.relativeX * canvas.width,
-        this.bbxTopLeftPoint.relativeY * canvas.height,
-        this.bbxBottomRightPoint.relativeX * canvas.width -
-          this.bbxTopLeftPoint.relativeX * canvas.width,
-        this.bbxBottomRightPoint.relativeY * canvas.height -
-          this.bbxTopLeftPoint.relativeY * canvas.height
-      )
+      // redraw them all
+      for (let bbx of this.currentBbxes) {
+        ctx.strokeRect(
+          bbx['bbxTopLeftPoint'].relativeX * canvas.width,
+          bbx['bbxTopLeftPoint'].relativeY * canvas.height,
+          bbx['bbxBottomRightPoint'].relativeX * canvas.width -
+            bbx['bbxTopLeftPoint'].relativeX * canvas.width,
+          bbx['bbxBottomRightPoint'].relativeY * canvas.height -
+            bbx['bbxTopLeftPoint'].relativeY * canvas.height
+        )
+      }
+
+      // reset caption cards height
+      this.resetCapCardsHeight()
     },
     bbxBottomRightPoint: function () {
       let canvas = document.getElementById('canvas')
@@ -544,6 +564,16 @@ export default {
       ctx.drawImage(this.img, 0, 0, this.canvasWidth, this.canvasHeight)
       ctx.strokeStyle = 'red'
       ctx.lineWidth = 1
+      for (let bbx of this.currentBbxes) {
+        ctx.strokeRect(
+          bbx['bbxTopLeftPoint'].relativeX * canvas.width,
+          bbx['bbxTopLeftPoint'].relativeY * canvas.height,
+          bbx['bbxBottomRightPoint'].relativeX * canvas.width -
+            bbx['bbxTopLeftPoint'].relativeX * canvas.width,
+          bbx['bbxBottomRightPoint'].relativeY * canvas.height -
+            bbx['bbxTopLeftPoint'].relativeY * canvas.height
+        )
+      }
       ctx.strokeRect(
         this.bbxTopLeftPoint.relativeX * canvas.width,
         this.bbxTopLeftPoint.relativeY * canvas.height,
@@ -554,7 +584,6 @@ export default {
       )
     },
     imgUrl: function () {
-      // console.log('Image url changed')
       let canvas = document.getElementById('canvas')
       let ctx = canvas.getContext('2d')
       let newImg = new Image()
@@ -569,6 +598,24 @@ export default {
         ctx.drawImage(this, 0, 0, that.canvasWidth, that.canvasHeight)
       }
       newImg.src = this.imgUrl
+    },
+    currentBbxes: function () {
+      let canvas = document.getElementById('canvas')
+      let ctx = canvas.getContext('2d')
+      ctx.drawImage(this.img, 0, 0, this.canvasWidth, this.canvasHeight)
+      ctx.strokeStyle = 'red'
+      ctx.lineWidth = 1
+      // redraw them all
+      for (let bbx of this.currentBbxes) {
+        ctx.strokeRect(
+          bbx['bbxTopLeftPoint'].relativeX * canvas.width,
+          bbx['bbxTopLeftPoint'].relativeY * canvas.height,
+          bbx['bbxBottomRightPoint'].relativeX * canvas.width -
+            bbx['bbxTopLeftPoint'].relativeX * canvas.width,
+          bbx['bbxBottomRightPoint'].relativeY * canvas.height -
+            bbx['bbxTopLeftPoint'].relativeY * canvas.height
+        )
+      }
     }
   },
   computed: {
@@ -585,6 +632,9 @@ export default {
     //   const { canvasWidth, bbxBottomRightPoint } = this
     //   return { canvasWidth, bbxBottomRightPoint }
     // }
+    currentBbxes: function () {
+      return this.bbxes[this.capSelected]
+    }
   },
   mounted: function () {
     window.onresize = () => {
@@ -593,7 +643,6 @@ export default {
       })()
     }
     this.canvasWidth = document.getElementById('caption-list').clientWidth
-    this.imgUrl = 'https://z3.ax1x.com/2021/08/16/fRVqLn.jpg'
 
     let getMousePos = function (canvas, event) {
       let rect = canvas.getBoundingClientRect()
@@ -635,82 +684,135 @@ export default {
           that.bbxTopLeftPoint.relativeY * canvas.height
       ) {
         that.bbxBottomRightPoint = currentMousePos
+        that.bbxes[that.capSelected].push({
+          bbxTopLeftPoint: that.bbxTopLeftPoint,
+          bbxBottomRightPoint: that.bbxBottomRightPoint
+        })
       }
     })
 
-    //In fact, the code below should not be here, I will move it to correct position later.
-    this.captions.forEach((cap, i) => {
-      axios
-        .get(this.baseUrl + 'tokenization?sentence=' + cap)
-        .then((response) => {
-          this.capTokens[i] = response.data['tokens']
-        })
-        .then(() => {
-          this.tokensDetailInfo.push([])
-          this.capTokens[i].forEach((token) => {
-            let tokenDetail = {}
-            tokenDetail['token'] = token
-            tokenDetail['tokenModifyTo'] = undefined
-            tokenDetail['provideAlterWords'] = false
-            tokenDetail['alterWords'] = []
-            this.tokensDetailInfo[i].push(tokenDetail)
-          })
-        })
-        .then(() => {
-          axios
-            .get(this.baseUrl + 'similar-substantive-tokens?sentence=' + cap)
-            .then((response) => {
-              response.data['similar_tokens_info'].forEach((tokensInfo) => {
-                this.tokensDetailInfo[i][tokensInfo['token_pos']][
-                  'provideAlterWords'
-                ] = true
-                this.tokensDetailInfo[i][tokensInfo['token_pos']][
-                  'alterWords'
-                ] = tokensInfo['similar_tokens']
-              })
-            })
-        })
-    })
+    this.getData()
   },
   methods: {
     getData: function () {
-      this.getLoading = true
-      axios.get(this.baseUrl + '/data?num=' + this.numSelected).then(
-        (response) => (
-          (this.dataSnackbar = response.data.id_num === 0),
-          (this.page = 1),
-          (this.data = response.data.data),
-          (this.idNum = response.data.id_num),
-          (this.idList = response.data.id_list),
-          (this.records = Array(response.data.id_num)
-            .fill(0)
-            .map(() => [])),
-          (this.dataRequested = true),
-          (this.getLoading = false)
-        )
-      )
+      // Request for original flickr30k pair data
+      const name = localStorage.getItem('name')
+      axios
+        .get(this.$api.BASE_URL + 'img-caps-pair?name=' + name)
+        .then((response) => {
+          if (response.data['success']) {
+            this.imgName = response.data['pair_data']['img']
+            this.imgUrl = response.data['pair_data']['img_url']
+            this.captions = response.data['pair_data']['caps']
+            this.modifiedCaptions = response.data['pair_data']['caps'].slice(0)
+            this.errorSelected = [] // default 'Entity Error'
+            this.completedState = [] // default false
+            this.capTokens = [] //default null
+            this.tokensDetailInfo = [] //default []
+            this.bbxes = [] // default []
+
+            this.captions.forEach((cap, i) => {
+              this.errorSelected.push('Entity Error')
+              this.completedState.push(false)
+              this.capTokens.push(null)
+              this.tokensDetailInfo.push([])
+              this.bbxes.push([])
+              axios
+                .get(this.$api.BASE_URL + 'tokenization?sentence=' + cap)
+                .then((response) => {
+                  this.capTokens[i] = response.data['tokens']
+                })
+                .then(() => {
+                  this.capTokens[i].forEach((token) => {
+                    let tokenDetail = {}
+                    tokenDetail['token'] = token
+                    tokenDetail['tokenModifyTo'] = undefined
+                    tokenDetail['provideAlterWords'] = false
+                    tokenDetail['alterWords'] = []
+                    this.tokensDetailInfo[i].push(tokenDetail)
+                  })
+                })
+                .then(() => {
+                  axios
+                    .get(
+                      this.$api.BASE_URL +
+                        'similar-substantive-tokens?sentence=' +
+                        cap
+                    )
+                    .then((response) => {
+                      response.data['similar_tokens_info'].forEach(
+                        (tokensInfo) => {
+                          this.tokensDetailInfo[i][tokensInfo['token_pos']][
+                            'provideAlterWords'
+                          ] = true
+                          this.tokensDetailInfo[i][tokensInfo['token_pos']][
+                            'alterWords'
+                          ] = tokensInfo['similar_tokens']
+                        }
+                      )
+                    })
+                })
+            })
+          } else {
+            // TO-DO show error message
+          }
+        })
+        .then(() => {
+          this.resetCapCardsHeight()
+        })
     },
-    chooseNegToken: function (capSelected, negTokenIdx) {
-      let idx = this.negTokenIdxes[capSelected].indexOf(negTokenIdx)
-      if (idx > -1) {
-        //delete existed choosed token item
-        this.negTokenIdxes[capSelected].splice(idx, 1)
-      } else {
-        this.negTokenIdxes[capSelected].push(negTokenIdx)
+    saveData: function (getNextOne) {
+      if (this.completedState.indexOf(false) >= 0) {
+        this.promptSnackbar = true
+        this.prompt =
+          'Please save after you have accomplished all the caption annotations!'
+        return
+      }
+
+      let name = localStorage.getItem('name')
+      let postData = {
+        name: name,
+        img: this.imgName,
+        errorSelected: this.errorSelected,
+        modifiedCaptions: this.modifiedCaptions,
+        bbxes: this.bbxes,
+        tokensDetailInfo: this.tokensDetailInfo
+      }
+
+      axios
+        .post(this.$api.BASE_URL + 'checking-annotation-data', {
+          data: postData,
+          next: getNextOne
+        })
+        .then((response) => {
+          if (response.data['success']) {
+            this.promptSnackbar = true
+            this.prompt = response.data['msg']
+          }
+        })
+        .then(() => {
+          if (getNextOne) {
+            this.getData()
+          }
+        })
+    },
+    resetCapCardsHeight: function () {
+      // reset caption cards height
+      let cards = document.getElementsByClassName('caption-card')
+      let maxCardHeight = 0
+      for (let i = 0; i < cards.length; i++) {
+        cards[i].style.height = ''
+        maxCardHeight =
+          cards[i].offsetHeight > maxCardHeight
+            ? cards[i].offsetHeight
+            : maxCardHeight
+      }
+      for (let i = 0; i < cards.length; i++) {
+        cards[i].style.height = maxCardHeight + 'px'
       }
     },
-    resetSelectedNegTokens: function (capSelected) {
-      this.negTokenIdxes[capSelected].splice(
-        0,
-        this.negTokenIdxes[capSelected].length
-      )
-      // this.$forceUpdate()
-    },
-    changeImage: function () {
-      this.imgUrl =
-        'http://172.16.2.156:8000/dataset-nlvr2_small/dev-167-3-img0.png'
-      this.bbxTopLeftPoint = {}
-      this.bbxBottomRightPoint = {}
+    changeSelectedCap: function (index) {
+      this.capSelected = index
     },
     draw: function () {
       let ctx = document.getElementById('canvas').getContext('2d')
@@ -719,11 +821,16 @@ export default {
       ctx.strokeRect(10, 10, 100, 100)
     },
     clearRect: function () {
-      this.bbxTopLeftPoint = {}
-      this.bbxBottomRightPoint = {}
+      this.bbxes[this.capSelected].splice(0)
     },
     varIsUndefined: function (v) {
       return typeof v === 'undefined'
+    },
+    truncateCap: function (cap) {
+      if (cap.length > 60) {
+        cap = cap.substring(0, 60) + '...'
+      }
+      return cap
     },
     showMoreDetailInfo: function (capIndex, tokenIndex) {
       // click a previously chosen token, select its state to unselected
@@ -828,17 +935,16 @@ export default {
     },
     addTokenToModifiedCap: function () {
       let inputValue = this.selectedDetailInfo['inputValue']
-      if (!inputValue) {
-        this.selectedDetailInfo['inputErrorSnackbar'] = true
-        this.selectedDetailInfo['inputErrorMessage'] =
-          'Empty input is not allowed!'
-      } else if ((inputValue || '').indexOf(' ') >= 0) {
-        this.selectedDetailInfo['inputErrorSnackbar'] = true
-        this.selectedDetailInfo['inputErrorMessage'] =
-          'Spaces are not allowed in the input!'
-      } else {
+        .trim()
+        .replace(/\s+/gm, ' ')
+      if (inputValue === '') {
+        this.resetSelectedDetailInfo(true)
+        return
+      }
+      let inputTokens = inputValue.split(' ').reverse()
+      for (const inputToken of inputTokens) {
         let tokenDetail = {}
-        tokenDetail['token'] = inputValue
+        tokenDetail['token'] = inputToken
         tokenDetail['tokenModifyTo'] = undefined
         tokenDetail['provideAlterWords'] = false
         tokenDetail['alterWords'] = []
@@ -847,59 +953,59 @@ export default {
           0,
           tokenDetail
         )
-        this.resetSelectedDetailInfo(false)
-        // this.selectedDetailInfo['inputToken'] = false
-        // this.selectedDetailInfo['inputValue'] = ''
-        // this.selectedDetailInfo['inputErrorSnackbar'] = false
-        // this.selectedDetailInfo['inputErrorMessage'] = ''
+      }
+      this.resetSelectedDetailInfo(false)
+      // this.selectedDetailInfo['inputToken'] = false
+      // this.selectedDetailInfo['inputValue'] = ''
+      // this.selectedDetailInfo['inputErrorSnackbar'] = false
+      // this.selectedDetailInfo['inputErrorMessage'] = ''
 
-        let capIndex = this.selectedDetailInfo['capIndex']
-        let tokenIndex = this.selectedDetailInfo['tokenIndex']
-        let tokensDetail = this.tokensDetailInfo[capIndex]
-        let modifiedCap = this.modifiedCaptions[this.capSelected]
-        let targetStart = 0
-        for (let i = 0; i <= tokenIndex; i++) {
-          //ignore blank space
-          while (modifiedCap[targetStart] === ' ') {
-            targetStart++
-          }
-          if (tokensDetail[i]['provideAlterWords']) {
-            let tokenModifyTo = tokensDetail[i]['tokenModifyTo']
-            if (this.varIsUndefined(tokenModifyTo)) {
-              targetStart += tokensDetail[i]['token'].length
-            } else {
-              targetStart += tokensDetail[i]['alterWords'][tokenModifyTo].length
-            }
-          } else {
-            targetStart += tokensDetail[i]['token'].length
-          }
-        }
+      let capIndex = this.selectedDetailInfo['capIndex']
+      let tokenIndex = this.selectedDetailInfo['tokenIndex']
+      let tokensDetail = this.tokensDetailInfo[capIndex]
+      let modifiedCap = this.modifiedCaptions[this.capSelected]
+      let targetStart = 0
+      for (let i = 0; i <= tokenIndex; i++) {
+        //ignore blank space
         while (modifiedCap[targetStart] === ' ') {
           targetStart++
         }
-        //add token to modified caption
-        let addedToken = inputValue
-        this.modifiedCaptions[this.capSelected] =
-          modifiedCap.substring(0, targetStart) +
-          addedToken +
-          ' ' +
-          modifiedCap.substring(targetStart, modifiedCap.length)
-        this.resetSelectedDetailInfo(true)
+        if (tokensDetail[i]['provideAlterWords']) {
+          let tokenModifyTo = tokensDetail[i]['tokenModifyTo']
+          if (this.varIsUndefined(tokenModifyTo)) {
+            targetStart += tokensDetail[i]['token'].length
+          } else {
+            targetStart += tokensDetail[i]['alterWords'][tokenModifyTo].length
+          }
+        } else {
+          targetStart += tokensDetail[i]['token'].length
+        }
       }
+      while (modifiedCap[targetStart] === ' ') {
+        targetStart++
+      }
+      //add token to modified caption
+      let addedToken = inputValue
+      this.modifiedCaptions[this.capSelected] =
+        modifiedCap.substring(0, targetStart) +
+        addedToken +
+        ' ' +
+        modifiedCap.substring(targetStart, modifiedCap.length)
+      this.resetSelectedDetailInfo(true)
     },
     addTokenInFrontOfModifiedCap: function () {
       let inputValue = this.extraDetailInfo['inputValue']
-      if (!inputValue) {
-        this.extraDetailInfo['inputErrorSnackbar'] = true
-        this.extraDetailInfo['inputErrorMessage'] =
-          'Empty input is not allowed!'
-      } else if ((inputValue || '').indexOf(' ') >= 0) {
-        this.extraDetailInfo['inputErrorSnackbar'] = true
-        this.extraDetailInfo['inputErrorMessage'] =
-          'Spaces are not allowed in the input!'
-      } else {
+        .trim()
+        .replace(/\s+/gm, ' ')
+      if (inputValue === '') {
+        this.resetExtraDetailInfo()
+        this.resetSelectedDetailInfo(true)
+        return
+      }
+      let inputTokens = inputValue.split(' ').reverse()
+      for (const inputToken of inputTokens) {
         let tokenDetail = {}
-        tokenDetail['token'] = inputValue
+        tokenDetail['token'] = inputToken
         tokenDetail['tokenModifyTo'] = undefined
         tokenDetail['provideAlterWords'] = false
         tokenDetail['alterWords'] = []
@@ -908,17 +1014,17 @@ export default {
         } else {
           this.tokensDetailInfo[this.capSelected].splice(0, 0, tokenDetail)
         }
-        let targetEnd = 0
-        let modifiedCap = this.modifiedCaptions[this.capSelected]
-        while (modifiedCap[targetEnd] === ' ') {
-          targetEnd++
-        }
-        //add token in front of the modified caption
-        this.modifiedCaptions[this.capSelected] =
-          inputValue + ' ' + modifiedCap.substring(targetEnd)
-        this.resetExtraDetailInfo()
-        this.resetSelectedDetailInfo(true)
       }
+      let targetEnd = 0
+      let modifiedCap = this.modifiedCaptions[this.capSelected]
+      while (modifiedCap[targetEnd] === ' ') {
+        targetEnd++
+      }
+      //add token in front of the modified caption
+      this.modifiedCaptions[this.capSelected] =
+        inputValue + ' ' + modifiedCap.substring(targetEnd)
+      this.resetExtraDetailInfo()
+      this.resetSelectedDetailInfo(true)
     },
     deleteTokenFromModifiedCap: function (capIndex, tokenIndex) {
       let tokensDetail = this.tokensDetailInfo[capIndex]
@@ -996,7 +1102,7 @@ export default {
       this.extraDetailInfo['inputValue'] = ''
       this.extraDetailInfo['inputErrorSnackbar'] = false
       this.extraDetailInfo['inputErrorMessage'] = ''
-    }
+    },
     // tokenizeSentence: function (sentence, capSelected) {
     //   axios
     //     .get(this.baseUrl + 'tokenization?sentence=' + sentence)
@@ -1004,6 +1110,9 @@ export default {
     //       this.capTokens[capSelected] = response.data['tokens']
     //     })
     // }
+    testFunction: function () {
+      console.log('wuhu')
+    }
   }
 }
 </script>
