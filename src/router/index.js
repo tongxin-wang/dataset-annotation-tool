@@ -2,8 +2,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../views/Login.vue'
 import Home from '../views/Home.vue'
-import Check from '../views/Check.vue'
-import Wsdemo from '../views/Wsdemo.vue'
 
 Vue.use(VueRouter)
 
@@ -20,22 +18,6 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
-  },
-  {
-    path: '/check',
-    name: 'Check',
-    component: Check,
-    meta: {
-      login: true
-    }
-  },
-  {
-    path: '/wsdemo',
-    name: 'Wsdemo',
-    component: Wsdemo,
-    meta: {
-      login: true
-    }
   }
 ]
 

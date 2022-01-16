@@ -7,7 +7,7 @@
       ></v-app-bar-nav-icon>
       <v-toolbar-title class="text-uppercase grey--text">
         <span>
-          <span>Negtive Caption </span>
+          <span>Negative Caption </span>
           <span class="font-weight-light">Annotation</span>
         </span>
       </v-toolbar-title>

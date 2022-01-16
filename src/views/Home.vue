@@ -1,31 +1,71 @@
 <template>
   <div class="home">
-    <v-container class="my-5 d-flex flex-column justify-center">
-      <div>
-        <v-row>
-          <v-chip color="accent" class="ml-3" text-color="white">
-            <v-avatar right class="blue mr-1 ml-0"> 999 </v-avatar>
-            images left
-          </v-chip>
-        </v-row>
-
-        <v-row>
-          <v-col cols="6">
-            <!-- <canvas
+    <!-- <v-container class="my-5 d-flex flex-column justify-center"> -->
+    <div class="mx-4">
+      <v-row>
+        <v-col cols="6">
+          <v-row class="mb-6">
+            <v-chip color="cyan" class="ml-3" text-color="white">
+              Annotator
+              <v-chip
+                small
+                color="cyan darken-3"
+                text-color="white"
+                class="ml-2"
+              >
+                {{ annotatorName }}
+              </v-chip>
+            </v-chip>
+            <v-chip color="deep-orange" class="ml-3" text-color="white">
+              Images left
+              <v-chip
+                small
+                color="deep-orange darken-3"
+                text-color="white"
+                class="ml-2"
+              >
+                {{ leftImgNum }}
+              </v-chip>
+            </v-chip>
+            <v-chip color="green" class="ml-3" text-color="white">
+              Images completed
+              <v-chip
+                small
+                color="green darken-3"
+                text-color="white"
+                class="ml-2"
+              >
+                {{ checkingImgNum }}
+              </v-chip>
+            </v-chip>
+            <v-spacer></v-spacer>
+            <v-btn
+              depressed
+              dark
+              fab
+              small
+              class="mr-2"
+              color="grey darken-2"
+              @click="clearRect"
+            >
+              <v-icon>mdi-broom</v-icon>
+            </v-btn>
+          </v-row>
+          <!-- <canvas
               id="canvas"
               width="400px"
               height="300px"
               style="border: 1px solid #000000"
             ></canvas> -->
-            <!-- <canvas
+          <!-- <canvas
               id="canvas"
             ></canvas> -->
-            <!-- <v-img id="oriImg" :src="imgUrl">
+          <!-- <v-img id="oriImg" :src="imgUrl">
               <canvas id="canvas"></canvas>
             </v-img> -->
-            <canvas id="canvas"></canvas>
-            <v-list rounded class="grey lighten-4 mt-2" id="caption-list">
-              <!-- <v-subheader>Captions</v-subheader>
+          <canvas id="canvas"></canvas>
+          <v-list rounded class="grey lighten-4 mt-2" id="caption-list">
+            <!-- <v-subheader>Captions</v-subheader>
               <v-list-item-group
                 v-model="capSelected"
                 mandatory
@@ -37,53 +77,89 @@
                   </v-list-item-content>
                 </v-list-item>
               </v-list-item-group> -->
-            </v-list>
-          </v-col>
+          </v-list>
+        </v-col>
 
-          <v-col cols="6">
-            <v-row>
-              <div class="grey--text font-weight-light">Captions</div>
-            </v-row>
-            <v-item-group mandatory>
-              <v-row dense style="margin-left: -16px; margin-bottom: 12px">
-                <v-col
-                  v-for="(cap, i) in captions"
-                  :key="i"
-                  @click="changeSelectedCap(i)"
-                >
-                  <v-item v-slot="{ active, toggle }">
-                    <v-card
-                      class="mx-auto caption-card"
-                      :color="active ? 'primary' : ''"
-                      outlined
-                      @click="toggle"
-                    >
-                      <v-card-title class="text-subtitle-1 font-weight-thin">
-                        <v-icon
-                          dense
-                          left
-                          v-show="completedState[i]"
-                          :color="active ? 'green lighten-2' : 'green'"
-                          >mdi-checkbox-marked-circle-outline</v-icon
-                        >
-                        <span :class="active ? 'white--text' : ''">{{
-                          'Caption ' + (i + 1)
-                        }}</span>
-                      </v-card-title>
-
-                      <v-card-subtitle
-                        class="text-caption"
-                        :class="active ? 'white--text' : ''"
+        <v-col cols="6">
+          <v-row justify="end">
+            <v-btn
+              depressed
+              rounded
+              class="mx-2"
+              color="primary"
+              @click="saveData(false)"
+            >
+              Save
+              <v-icon right>mdi-content-save</v-icon>
+            </v-btn>
+            <v-btn
+              depressed
+              rounded
+              class="mx-2"
+              color="primary"
+              @click="saveData(true)"
+            >
+              Next
+              <v-icon right>mdi-skip-next</v-icon>
+            </v-btn>
+            <!-- <v-btn
+                depressed
+                class="ma-2"
+                color="primary"
+                @click="changeImage"
+              >
+                Change Image
+              </v-btn>
+              <v-btn depressed class="ma-2" color="primary" @click="draw">
+                Draw
+              </v-btn>
+              <v-btn depressed class="ma-2" color="primary" @click="clearRect">
+                Clear Rect
+              </v-btn> -->
+          </v-row>
+          <v-row>
+            <div class="grey--text font-weight-light">Captions</div>
+          </v-row>
+          <v-item-group mandatory :value="capSelected">
+            <v-row dense style="margin-left: -16px; margin-bottom: 12px">
+              <v-col
+                v-for="(cap, i) in captions"
+                :key="i"
+                @click="changeSelectedCap(i)"
+              >
+                <v-item v-slot="{ active, toggle }">
+                  <v-card
+                    class="mx-auto caption-card"
+                    :color="active ? 'primary' : ''"
+                    outlined
+                    @click="toggle"
+                  >
+                    <v-card-title class="text-subtitle-1 font-weight-thin">
+                      <v-icon
+                        dense
+                        left
+                        v-show="completedState[i]"
+                        :color="active ? 'green lighten-2' : 'green'"
+                        >mdi-checkbox-marked-circle-outline</v-icon
                       >
-                        {{ truncateCap(cap) }}
-                      </v-card-subtitle>
-                    </v-card>
-                  </v-item>
-                </v-col>
-              </v-row>
-            </v-item-group>
+                      <span :class="active ? 'white--text' : ''">{{
+                        'Caption ' + (i + 1)
+                      }}</span>
+                    </v-card-title>
 
-            <!-- <v-list rounded class="grey lighten-4 mt-2" id="caption-list">
+                    <v-card-subtitle
+                      class="text-caption"
+                      :class="active ? 'white--text' : ''"
+                    >
+                      {{ truncateCap(cap) }}
+                    </v-card-subtitle>
+                  </v-card>
+                </v-item>
+              </v-col>
+            </v-row>
+          </v-item-group>
+
+          <!-- <v-list rounded class="grey lighten-4 mt-2" id="caption-list">
               <v-subheader>Captions</v-subheader>
               <v-list-item-group
                 v-model="capSelected"
@@ -98,161 +174,99 @@
               </v-list-item-group>
             </v-list> -->
 
-            <v-row>
-              <v-textarea
-                filled
-                auto-grow
-                :label="'Original Caption ' + (capSelected + 1)"
-                rows="2"
-                disabled
-                :value="captions[capSelected]"
-              ></v-textarea>
-            </v-row>
-            <v-row>
-              <v-textarea
-                filled
-                auto-grow
-                :label="'Modified Caption ' + (capSelected + 1)"
-                rows="2"
-                disabled
-                v-model="modifiedCaptions[capSelected]"
-                @input="resetSelectedNegTokens(capSelected)"
-              ></v-textarea>
-            </v-row>
-            <v-row>
-              <div class="grey--text font-weight-light">Tokens</div>
-            </v-row>
-            <v-row>
-              <template
-                v-if="
-                  tokensDetailInfo[capSelected].length === 0 ||
-                  (selectedDetailInfo['capIndex'] === capSelected &&
-                    selectedDetailInfo['tokenIndex'] === 0)
+          <v-row>
+            <v-textarea
+              filled
+              auto-grow
+              :label="'Original Caption ' + (capSelected + 1)"
+              rows="2"
+              disabled
+              :value="captions[capSelected]"
+            ></v-textarea>
+          </v-row>
+          <v-row>
+            <v-textarea
+              filled
+              auto-grow
+              :label="'Modified Caption ' + (capSelected + 1)"
+              rows="2"
+              disabled
+              v-model="modifiedCaptions[capSelected]"
+              @input="resetSelectedNegTokens(capSelected)"
+            ></v-textarea>
+          </v-row>
+          <v-row>
+            <div class="grey--text font-weight-light">Tokens</div>
+          </v-row>
+          <v-row>
+            <template
+              v-if="
+                tokensDetailInfo[capSelected].length === 0 ||
+                (selectedDetailInfo['capIndex'] === capSelected &&
+                  selectedDetailInfo['tokenIndex'] === 0)
+              "
+            >
+              <v-chip
+                outlined
+                color="green lighten-2"
+                class="mx-1 my-2"
+                style="user-select: text"
+                @click="showExtraDetailInfo"
+              >
+                Token
+                <v-icon small right>mdi-pencil-plus-outline</v-icon>
+              </v-chip>
+              <v-chip
+                v-show="
+                  extraDetailInfo['selected'] &&
+                  extraDetailInfo['capIndex'] === capSelected
                 "
+                class="mx-1 my-2"
               >
-                <v-chip
-                  outlined
-                  color="green lighten-2"
-                  class="mx-1 my-2"
-                  style="user-select: text"
-                  @click="showExtraDetailInfo"
-                >
-                  Token
-                  <v-icon small right>mdi-pencil-plus-outline</v-icon>
-                </v-chip>
-                <v-chip
-                  v-show="
-                    extraDetailInfo['selected'] &&
-                    extraDetailInfo['capIndex'] === capSelected
-                  "
-                  class="mx-1 my-2"
-                >
-                  <v-text-field
-                    v-model="extraDetailInfo['inputValue']"
-                    style="width: 100px"
-                    @change="addTokenInFrontOfModifiedCap"
-                    @blur="addTokenInFrontOfModifiedCap"
-                  ></v-text-field>
-                </v-chip>
-              </template>
-              <template
-                v-for="(tokenDetail, i) in tokensDetailInfo[capSelected]"
-              >
-                <template v-if="tokenDetail['provideAlterWords']">
-                  <template v-if="varIsUndefined(tokenDetail['tokenModifyTo'])">
-                    <v-badge
-                      :key="capSelected + '-' + i"
-                      :value="
-                        selectedDetailInfo['capIndex'] === capSelected &&
-                        selectedDetailInfo['tokenIndex'] === i
-                      "
-                      class="mx-1 my-2"
-                      color="grey lighten-4"
-                      offset-y="9"
-                      offset-x="10"
-                      left
-                      overlap
-                    >
-                      <template v-slot:badge>
-                        <v-icon
-                          small
-                          color="red lighten-1"
-                          style="cursor: pointer"
-                          @click="deleteTokenFromModifiedCap(capSelected, i)"
-                        >
-                          mdi-close-circle-outline
-                        </v-icon>
-                      </template>
-                      <v-chip
-                        link
-                        color="green lighten-2"
-                        text-color="white"
-                        style="user-select: text"
-                        @click="showMoreDetailInfo(capSelected, i)"
+                <v-text-field
+                  v-model="extraDetailInfo['inputValue']"
+                  style="width: 100px"
+                  @change="addTokenInFrontOfModifiedCap"
+                  @blur="addTokenInFrontOfModifiedCap"
+                ></v-text-field>
+              </v-chip>
+            </template>
+            <template v-for="(tokenDetail, i) in tokensDetailInfo[capSelected]">
+              <template v-if="tokenDetail['provideAlterWords']">
+                <template v-if="varIsUndefined(tokenDetail['tokenModifyTo'])">
+                  <v-badge
+                    :key="capSelected + '-' + i"
+                    :value="
+                      selectedDetailInfo['capIndex'] === capSelected &&
+                      selectedDetailInfo['tokenIndex'] === i
+                    "
+                    class="mx-1 my-2"
+                    color="grey lighten-4"
+                    offset-y="9"
+                    offset-x="10"
+                    left
+                    overlap
+                  >
+                    <template v-slot:badge>
+                      <v-icon
+                        small
+                        color="red lighten-1"
+                        style="cursor: pointer"
+                        @click="deleteTokenFromModifiedCap(capSelected, i)"
                       >
-                        {{ tokenDetail['token'] }}
-                      </v-chip>
-                    </v-badge>
-                  </template>
-                  <template v-else>
-                    <v-badge
-                      :key="capSelected + '-' + i"
-                      :value="
-                        selectedDetailInfo['capIndex'] == capSelected &&
-                        selectedDetailInfo['tokenIndex'] == i
-                      "
-                      class="mx-1 my-2"
-                      color="grey lighten-4"
-                      offset-y="9"
-                      offset-x="10"
-                      left
-                      overlap
+                        mdi-close-circle-outline
+                      </v-icon>
+                    </template>
+                    <v-chip
+                      link
+                      color="green lighten-2"
+                      text-color="white"
+                      style="user-select: text"
+                      @click="showMoreDetailInfo(capSelected, i)"
                     >
-                      <template v-slot:badge>
-                        <v-icon
-                          small
-                          color="red lighten-1"
-                          style="cursor: pointer"
-                          @click="deleteTokenFromModifiedCap(capSelected, i)"
-                        >
-                          mdi-close-circle-outline
-                        </v-icon>
-                      </template>
-                      <v-chip
-                        outlined
-                        style="
-                          border-color: black;
-                          border-width: 1px;
-                          border-style: dashed;
-                        "
-                        @click="showMoreDetailInfo(capSelected, i)"
-                      >
-                        <v-chip
-                          link
-                          small
-                          color="green lighten-2"
-                          text-color="white"
-                          style="user-select: text"
-                        >
-                          {{ tokenDetail['token'] }}
-                        </v-chip>
-                        <v-icon> mdi-arrow-right-thin </v-icon>
-                        <v-chip
-                          link
-                          small
-                          color="red lighten-1"
-                          text-color="white"
-                          style="user-select: text"
-                        >
-                          {{
-                            tokenDetail['alterWords'][
-                              tokenDetail['tokenModifyTo']
-                            ]
-                          }}
-                        </v-chip>
-                      </v-chip>
-                    </v-badge>
-                  </template>
+                      {{ tokenDetail['token'] }}
+                    </v-chip>
+                  </v-badge>
                 </template>
                 <template v-else>
                   <v-badge
@@ -279,176 +293,264 @@
                       </v-icon>
                     </template>
                     <v-chip
-                      link
-                      style="user-select: text"
+                      outlined
+                      style="
+                        border-color: black;
+                        border-width: 1px;
+                        border-style: dashed;
+                      "
                       @click="showMoreDetailInfo(capSelected, i)"
                     >
-                      {{ tokenDetail['token'] }}
+                      <v-chip
+                        link
+                        small
+                        color="green lighten-2"
+                        text-color="white"
+                        style="user-select: text"
+                      >
+                        {{ tokenDetail['token'] }}
+                      </v-chip>
+                      <v-icon> mdi-arrow-right-thin </v-icon>
+                      <v-chip
+                        link
+                        small
+                        color="red lighten-1"
+                        text-color="white"
+                        style="user-select: text"
+                      >
+                        {{
+                          tokenDetail['alterWords'][
+                            tokenDetail['tokenModifyTo']
+                          ]
+                        }}
+                      </v-chip>
                     </v-chip>
                   </v-badge>
                 </template>
-                <template
-                  v-if="
-                    !varIsUndefined(selectedDetailInfo['tokenIndex']) &&
+              </template>
+              <template v-else>
+                <v-badge
+                  :key="capSelected + '-' + i"
+                  :value="
                     selectedDetailInfo['capIndex'] == capSelected &&
                     selectedDetailInfo['tokenIndex'] == i
                   "
+                  class="mx-1 my-2"
+                  color="grey lighten-4"
+                  offset-y="9"
+                  offset-x="10"
+                  left
+                  overlap
                 >
-                  <v-icon
-                    v-show="!selectedDetailInfo['inputToken']"
-                    :key="'icon' + capSelected + '-' + i"
-                    small
-                    @click="selectedDetailInfo['inputToken'] = true"
-                    >mdi-plus-circle-outline</v-icon
-                  >
+                  <template v-slot:badge>
+                    <v-icon
+                      small
+                      color="red lighten-1"
+                      style="cursor: pointer"
+                      @click="deleteTokenFromModifiedCap(capSelected, i)"
+                    >
+                      mdi-close-circle-outline
+                    </v-icon>
+                  </template>
                   <v-chip
-                    v-show="selectedDetailInfo['inputToken']"
-                    class="mx-1 my-2"
-                    :key="'input' + capSelected + '-' + i"
+                    link
+                    :color="tokenDetail['changeToNeg'] ? 'red lighten-1' : ''"
+                    :text-color="tokenDetail['changeToNeg'] ? 'white' : ''"
+                    style="user-select: text"
+                    @click="showMoreDetailInfo(capSelected, i)"
                   >
-                    <v-text-field
-                      v-model="selectedDetailInfo['inputValue']"
-                      style="width: 100px"
-                      @change="addTokenToModifiedCap"
-                      @blur="addTokenToModifiedCap"
-                    ></v-text-field>
+                    {{ tokenDetail['token'] }}
                   </v-chip>
-                </template>
+                </v-badge>
               </template>
-            </v-row>
-
-            <div
-              v-if="
-                !varIsUndefined(selectedDetailInfo['tokenIndex']) &&
-                selectedDetailInfo['capIndex'] == capSelected &&
-                tokensDetailInfo[selectedDetailInfo['capIndex']][
-                  selectedDetailInfo['tokenIndex']
-                ]['provideAlterWords']
-              "
-            >
-              <v-row class="mt-1">
-                <div class="grey--text font-weight-light">
-                  Alternative Words of
-                  <v-chip small outlined color="green lighten-2">{{
-                    tokensDetailInfo[selectedDetailInfo['capIndex']][
-                      selectedDetailInfo['tokenIndex']
-                    ]['token']
-                  }}</v-chip>
-                </div>
-              </v-row>
-              <v-row>
-                <v-chip
-                  v-for="(word, i) in tokensDetailInfo[
-                    selectedDetailInfo['capIndex']
-                  ][selectedDetailInfo['tokenIndex']]['alterWords']"
-                  :key="i"
-                  class="ma-1"
-                  :class="
-                    tokensDetailInfo[selectedDetailInfo['capIndex']][
-                      selectedDetailInfo['tokenIndex']
-                    ]['tokenModifyTo'] === i
-                      ? 'red--text'
-                      : ''
-                  "
-                  :color="
-                    tokensDetailInfo[selectedDetailInfo['capIndex']][
-                      selectedDetailInfo['tokenIndex']
-                    ]['tokenModifyTo'] === i
-                      ? 'red lighten-4'
-                      : ''
-                  "
-                  style="user-select: text"
-                  @click="changeAlterWord(i)"
-                >
-                  {{ word }}
-                </v-chip>
-              </v-row>
-            </div>
-
-            <hr size="1" class="mt-3" style="border-style: dashed" />
-            <v-row>
-              <div class="grey--text font-weight-light mt-3">Error Type</div>
-            </v-row>
-            <v-row>
-              <v-radio-group
-                class="ma-0"
-                v-model="errorSelected[capSelected]"
-                row
+              <template
+                v-if="
+                  !varIsUndefined(selectedDetailInfo['tokenIndex']) &&
+                  selectedDetailInfo['capIndex'] == capSelected &&
+                  selectedDetailInfo['tokenIndex'] == i
+                "
               >
-                <v-radio
-                  v-for="(error, i) in errorItems"
-                  :key="i"
-                  :label="error"
-                  :value="error"
-                ></v-radio>
-              </v-radio-group>
+                <v-icon
+                  v-show="!selectedDetailInfo['inputToken']"
+                  :key="'icon' + capSelected + '-' + i"
+                  small
+                  @click="selectedDetailInfo['inputToken'] = true"
+                  >mdi-plus-circle-outline</v-icon
+                >
+                <v-chip
+                  v-show="selectedDetailInfo['inputToken']"
+                  class="mx-1 my-2"
+                  :key="'input' + capSelected + '-' + i"
+                >
+                  <v-text-field
+                    v-model="selectedDetailInfo['inputValue']"
+                    style="width: 100px"
+                    @change="addTokenToModifiedCap"
+                    @blur="addTokenToModifiedCap"
+                  ></v-text-field>
+                </v-chip>
+              </template>
+            </template>
+          </v-row>
+
+          <template
+            v-if="
+              !varIsUndefined(selectedDetailInfo['tokenIndex']) &&
+              selectedDetailInfo['capIndex'] == capSelected &&
+              tokensDetailInfo[selectedDetailInfo['capIndex']][
+                selectedDetailInfo['tokenIndex']
+              ]['provideAlterWords']
+            "
+          >
+            <v-row class="mt-1">
+              <div class="grey--text font-weight-light">
+                Alternative Words of
+                <v-chip small outlined color="green lighten-2">{{
+                  tokensDetailInfo[selectedDetailInfo['capIndex']][
+                    selectedDetailInfo['tokenIndex']
+                  ]['token']
+                }}</v-chip>
+              </div>
             </v-row>
-            <v-row>
-              <div class="grey--text font-weight-light">Completed State</div>
+            <v-row class="mb-3">
+              <v-chip
+                v-for="(word, i) in tokensDetailInfo[
+                  selectedDetailInfo['capIndex']
+                ][selectedDetailInfo['tokenIndex']]['alterWords']"
+                :key="i"
+                class="ma-1"
+                :class="
+                  tokensDetailInfo[selectedDetailInfo['capIndex']][
+                    selectedDetailInfo['tokenIndex']
+                  ]['tokenModifyTo'] === i
+                    ? 'red--text'
+                    : ''
+                "
+                :color="
+                  tokensDetailInfo[selectedDetailInfo['capIndex']][
+                    selectedDetailInfo['tokenIndex']
+                  ]['tokenModifyTo'] === i
+                    ? 'red lighten-4'
+                    : ''
+                "
+                style="user-select: text"
+                @click="changeAlterWord(i)"
+              >
+                {{ word }}
+              </v-chip>
+              <v-chip
+                outlined
+                class="ma-1"
+                color="green lighten-2"
+                style="user-select: text"
+                @click="
+                  showAddAlterWordsDetailInfo(selectedDetailInfo['tokenIndex'])
+                "
+              >
+                Token
+                <v-icon small right>mdi-pencil-plus-outline</v-icon>
+              </v-chip>
+              <v-chip
+                v-show="
+                  addAlterWordsDetailInfo['selected'] &&
+                  addAlterWordsDetailInfo['capIndex'] === capSelected
+                "
+                class="ma-1"
+              >
+                <v-text-field
+                  v-model="addAlterWordsDetailInfo['inputValue']"
+                  style="width: 100px"
+                  @change="addTokenToAlterWords"
+                  @blur="addTokenToAlterWords"
+                ></v-text-field>
+              </v-chip>
+            </v-row>
+          </template>
+
+          <template
+            v-else-if="
+              !varIsUndefined(selectedDetailInfo['tokenIndex']) &&
+              selectedDetailInfo['capIndex'] == capSelected &&
+              !tokensDetailInfo[selectedDetailInfo['capIndex']][
+                selectedDetailInfo['tokenIndex']
+              ]['provideAlterWords']
+            "
+          >
+            <v-row class="mt-1">
+              <div class="grey--text font-weight-light">
+                Change the State of the Selected Token
+              </div>
             </v-row>
             <v-row>
               <v-switch
-                v-model="completedState[capSelected]"
-                class="ma-0"
-                inset
+                v-model="
+                  tokensDetailInfo[selectedDetailInfo['capIndex']][
+                    selectedDetailInfo['tokenIndex']
+                  ]['changeToNeg']
+                "
+                color="red"
                 :label="
-                  completedState[capSelected] ? 'completed' : 'uncompleted'
+                  tokensDetailInfo[selectedDetailInfo['capIndex']][
+                    selectedDetailInfo['tokenIndex']
+                  ]['changeToNeg']
+                    ? 'Negative'
+                    : 'Positive'
                 "
               ></v-switch>
             </v-row>
-            <v-row>
-              <v-btn
-                depressed
-                class="ma-2"
-                color="primary"
-                @click="saveData(false)"
-              >
-                Save
-              </v-btn>
-              <v-btn
-                depressed
-                class="ma-2"
-                color="primary"
-                @click="saveData(true)"
-              >
-                Next
-              </v-btn>
-              <v-btn depressed class="ma-2" color="primary" @click="clearRect">
-                Clear Rects
-              </v-btn>
-              <!-- <v-btn
-                depressed
-                class="ma-2"
-                color="primary"
-                @click="changeImage"
-              >
-                Change Image
-              </v-btn>
-              <v-btn depressed class="ma-2" color="primary" @click="draw">
-                Draw
-              </v-btn>
-              <v-btn depressed class="ma-2" color="primary" @click="clearRect">
-                Clear Rect
-              </v-btn> -->
-            </v-row>
-          </v-col>
-        </v-row>
-
-        <v-snackbar v-model="promptSnackbar" top timeout="3000">
-          {{ prompt }}
-          <template v-slot:action="{ attrs }">
-            <v-btn
-              text
-              color="pink"
-              v-bind="attrs"
-              @click="promptSnackbar = false"
-            >
-              Close
-            </v-btn>
           </template>
-        </v-snackbar>
 
-        <!-- <v-snackbar v-model="dataSnackbar" top timeout="2000">
+          <template v-else>
+            <v-row class="mb-3"></v-row>
+          </template>
+
+          <hr size="1" style="border-style: dashed" />
+          <v-row>
+            <div class="grey--text font-weight-light mt-3">Error Type</div>
+          </v-row>
+          <v-row>
+            <v-radio-group
+              class="ma-0"
+              v-model="errorSelected[capSelected]"
+              row
+            >
+              <v-radio
+                v-for="(error, i) in errorItems"
+                :key="i"
+                :label="error"
+                :value="error"
+              ></v-radio>
+            </v-radio-group>
+          </v-row>
+          <v-row>
+            <div class="grey--text font-weight-light">Completed State</div>
+          </v-row>
+          <v-row>
+            <v-switch
+              v-model="completedState[capSelected]"
+              class="ma-0"
+              inset
+              :label="completedState[capSelected] ? 'Completed' : 'Uncompleted'"
+            ></v-switch>
+          </v-row>
+        </v-col>
+      </v-row>
+
+      <v-snackbar v-model="promptSnackbar" top timeout="3000">
+        {{ prompt }}
+        <template v-slot:action="{ attrs }">
+          <v-btn
+            text
+            color="pink"
+            v-bind="attrs"
+            @click="promptSnackbar = false"
+          >
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
+
+      <!-- <v-snackbar v-model="dataSnackbar" top timeout="2000">
           No data!
           <template v-slot:action="{ attrs }">
             <v-btn text v-bind="attrs" @click="dataSnackbar = false">
@@ -456,8 +558,8 @@
             </v-btn>
           </template>
         </v-snackbar> -->
-      </div>
-    </v-container>
+    </div>
+    <!-- </v-container> -->
   </div>
 </template>
 
@@ -466,6 +568,9 @@ import axios from 'axios'
 
 export default {
   data: () => ({
+    annotatorName: '',
+    leftImgNum: 0,
+    checkingImgNum: 0,
     errorItems: [
       'Entity Error',
       'Attribute Error(Modifier)',
@@ -515,10 +620,10 @@ export default {
     capCardHeight: 0,
     img: new Image(),
     mouseDown: false,
-    bbxTopLeftPoint: {},
-    bbxBottomRightPoint: {},
+    bboxTopLeftPoint: {},
+    bboxBottomRightPoint: {},
     // here * num
-    bbxes: [[]],
+    bboxes: [[]],
     // here * num
     tokensDetailInfo: [[]],
     selectedDetailInfo: {
@@ -529,6 +634,12 @@ export default {
     },
     extraDetailInfo: {
       capIndex: undefined,
+      selected: false,
+      inputValue: ''
+    },
+    addAlterWordsDetailInfo: {
+      capIndex: undefined,
+      tokenIndex: undefined,
       selected: false,
       inputValue: ''
     }
@@ -544,43 +655,43 @@ export default {
       ctx.strokeStyle = 'red'
       ctx.lineWidth = 1
       // redraw them all
-      for (let bbx of this.currentBbxes) {
+      for (let bbox of this.currentBboxes) {
         ctx.strokeRect(
-          bbx['bbxTopLeftPoint'].relativeX * canvas.width,
-          bbx['bbxTopLeftPoint'].relativeY * canvas.height,
-          bbx['bbxBottomRightPoint'].relativeX * canvas.width -
-            bbx['bbxTopLeftPoint'].relativeX * canvas.width,
-          bbx['bbxBottomRightPoint'].relativeY * canvas.height -
-            bbx['bbxTopLeftPoint'].relativeY * canvas.height
+          bbox['bboxTopLeftPoint'].relativeX * canvas.width,
+          bbox['bboxTopLeftPoint'].relativeY * canvas.height,
+          bbox['bboxBottomRightPoint'].relativeX * canvas.width -
+            bbox['bboxTopLeftPoint'].relativeX * canvas.width,
+          bbox['bboxBottomRightPoint'].relativeY * canvas.height -
+            bbox['bboxTopLeftPoint'].relativeY * canvas.height
         )
       }
 
       // reset caption cards height
       this.resetCapCardsHeight()
     },
-    bbxBottomRightPoint: function () {
+    bboxBottomRightPoint: function () {
       let canvas = document.getElementById('canvas')
       let ctx = canvas.getContext('2d')
       ctx.drawImage(this.img, 0, 0, this.canvasWidth, this.canvasHeight)
       ctx.strokeStyle = 'red'
       ctx.lineWidth = 1
-      for (let bbx of this.currentBbxes) {
+      for (let bbox of this.currentBboxes) {
         ctx.strokeRect(
-          bbx['bbxTopLeftPoint'].relativeX * canvas.width,
-          bbx['bbxTopLeftPoint'].relativeY * canvas.height,
-          bbx['bbxBottomRightPoint'].relativeX * canvas.width -
-            bbx['bbxTopLeftPoint'].relativeX * canvas.width,
-          bbx['bbxBottomRightPoint'].relativeY * canvas.height -
-            bbx['bbxTopLeftPoint'].relativeY * canvas.height
+          bbox['bboxTopLeftPoint'].relativeX * canvas.width,
+          bbox['bboxTopLeftPoint'].relativeY * canvas.height,
+          bbox['bboxBottomRightPoint'].relativeX * canvas.width -
+            bbox['bboxTopLeftPoint'].relativeX * canvas.width,
+          bbox['bboxBottomRightPoint'].relativeY * canvas.height -
+            bbox['bboxTopLeftPoint'].relativeY * canvas.height
         )
       }
       ctx.strokeRect(
-        this.bbxTopLeftPoint.relativeX * canvas.width,
-        this.bbxTopLeftPoint.relativeY * canvas.height,
-        this.bbxBottomRightPoint.relativeX * canvas.width -
-          this.bbxTopLeftPoint.relativeX * canvas.width,
-        this.bbxBottomRightPoint.relativeY * canvas.height -
-          this.bbxTopLeftPoint.relativeY * canvas.height
+        this.bboxTopLeftPoint.relativeX * canvas.width,
+        this.bboxTopLeftPoint.relativeY * canvas.height,
+        this.bboxBottomRightPoint.relativeX * canvas.width -
+          this.bboxTopLeftPoint.relativeX * canvas.width,
+        this.bboxBottomRightPoint.relativeY * canvas.height -
+          this.bboxTopLeftPoint.relativeY * canvas.height
       )
     },
     imgUrl: function () {
@@ -599,21 +710,39 @@ export default {
       }
       newImg.src = this.imgUrl
     },
-    currentBbxes: function () {
+    img: function () {
+      let canvas = document.getElementById('canvas')
+      let ctx = canvas.getContext('2d')
+      ctx.drawImage(this.img, 0, 0, this.canvasWidth, this.canvasHeight)
+      ctx.strokeStyle = 'red'
+      ctx.lineWidth = 1
+      // restore the bboxes
+      for (let bbox of this.currentBboxes) {
+        ctx.strokeRect(
+          bbox['bboxTopLeftPoint'].relativeX * canvas.width,
+          bbox['bboxTopLeftPoint'].relativeY * canvas.height,
+          bbox['bboxBottomRightPoint'].relativeX * canvas.width -
+            bbox['bboxTopLeftPoint'].relativeX * canvas.width,
+          bbox['bboxBottomRightPoint'].relativeY * canvas.height -
+            bbox['bboxTopLeftPoint'].relativeY * canvas.height
+        )
+      }
+    },
+    currentBboxes: function () {
       let canvas = document.getElementById('canvas')
       let ctx = canvas.getContext('2d')
       ctx.drawImage(this.img, 0, 0, this.canvasWidth, this.canvasHeight)
       ctx.strokeStyle = 'red'
       ctx.lineWidth = 1
       // redraw them all
-      for (let bbx of this.currentBbxes) {
+      for (let bbox of this.currentBboxes) {
         ctx.strokeRect(
-          bbx['bbxTopLeftPoint'].relativeX * canvas.width,
-          bbx['bbxTopLeftPoint'].relativeY * canvas.height,
-          bbx['bbxBottomRightPoint'].relativeX * canvas.width -
-            bbx['bbxTopLeftPoint'].relativeX * canvas.width,
-          bbx['bbxBottomRightPoint'].relativeY * canvas.height -
-            bbx['bbxTopLeftPoint'].relativeY * canvas.height
+          bbox['bboxTopLeftPoint'].relativeX * canvas.width,
+          bbox['bboxTopLeftPoint'].relativeY * canvas.height,
+          bbox['bboxBottomRightPoint'].relativeX * canvas.width -
+            bbox['bboxTopLeftPoint'].relativeX * canvas.width,
+          bbox['bboxBottomRightPoint'].relativeY * canvas.height -
+            bbox['bboxTopLeftPoint'].relativeY * canvas.height
         )
       }
     }
@@ -629,11 +758,11 @@ export default {
     //   //   : []
     // }
     // listenChange: function () {
-    //   const { canvasWidth, bbxBottomRightPoint } = this
-    //   return { canvasWidth, bbxBottomRightPoint }
+    //   const { canvasWidth, bboxBottomRightPoint } = this
+    //   return { canvasWidth, bboxBottomRightPoint }
     // }
-    currentBbxes: function () {
-      return this.bbxes[this.capSelected]
+    currentBboxes: function () {
+      return this.bboxes[this.capSelected]
     }
   },
   mounted: function () {
@@ -657,7 +786,7 @@ export default {
 
     let canvas = document.getElementById('canvas')
     canvas.addEventListener('mousedown', function (event) {
-      that.bbxTopLeftPoint = getMousePos(canvas, event)
+      that.bboxTopLeftPoint = getMousePos(canvas, event)
       that.mouseDown = true
     })
 
@@ -666,11 +795,11 @@ export default {
       if (
         that.mouseDown &&
         currentMousePos.relativeX * canvas.width >
-          that.bbxTopLeftPoint.relativeX * canvas.width &&
+          that.bboxTopLeftPoint.relativeX * canvas.width &&
         currentMousePos.relativeY * canvas.height >
-          that.bbxTopLeftPoint.relativeY * canvas.height
+          that.bboxTopLeftPoint.relativeY * canvas.height
       ) {
-        that.bbxBottomRightPoint = currentMousePos
+        that.bboxBottomRightPoint = currentMousePos
       }
     })
 
@@ -679,14 +808,14 @@ export default {
       let currentMousePos = getMousePos(canvas, event)
       if (
         currentMousePos.relativeX * canvas.width >
-          that.bbxTopLeftPoint.relativeX * canvas.width &&
+          that.bboxTopLeftPoint.relativeX * canvas.width &&
         currentMousePos.relativeY * canvas.height >
-          that.bbxTopLeftPoint.relativeY * canvas.height
+          that.bboxTopLeftPoint.relativeY * canvas.height
       ) {
-        that.bbxBottomRightPoint = currentMousePos
-        that.bbxes[that.capSelected].push({
-          bbxTopLeftPoint: that.bbxTopLeftPoint,
-          bbxBottomRightPoint: that.bbxBottomRightPoint
+        that.bboxBottomRightPoint = currentMousePos
+        that.bboxes[that.capSelected].push({
+          bboxTopLeftPoint: that.bboxTopLeftPoint,
+          bboxBottomRightPoint: that.bboxBottomRightPoint
         })
       }
     })
@@ -700,59 +829,98 @@ export default {
       axios
         .get(this.$api.BASE_URL + 'img-caps-pair?name=' + name)
         .then((response) => {
+          console.log(response.data)
           if (response.data['success']) {
-            this.imgName = response.data['pair_data']['img']
-            this.imgUrl = response.data['pair_data']['img_url']
-            this.captions = response.data['pair_data']['caps']
-            this.modifiedCaptions = response.data['pair_data']['caps'].slice(0)
-            this.errorSelected = [] // default 'Entity Error'
-            this.completedState = [] // default false
-            this.capTokens = [] //default null
-            this.tokensDetailInfo = [] //default []
-            this.bbxes = [] // default []
+            this.imgName = response.data['annotation_data']['img']
+            this.imgUrl = response.data['annotation_data']['img_url']
+            this.captions = response.data['annotation_data']['caps']
+            this.annotatorName = response.data['annotation_data']['name']
+            this.leftImgNum = response.data['annotation_data']['left_img_num']
+            this.checkingImgNum = response.data['annotation_data']['checking_img_num']
+            if (response.data['annotation_data']['restore_data']) {
+              this.modifiedCaptions =
+                response.data['annotation_data']['modifiedCaptions']
+              this.errorSelected =
+                response.data['annotation_data']['errorSelected']
+              this.completedState =
+                response.data['annotation_data']['completedState']
+              this.capTokens = response.data['annotation_data']['capTokens']
+              this.tokensDetailInfo =
+                response.data['annotation_data']['tokensDetailInfo']
+              this.bboxes = response.data['annotation_data']['bboxes']
 
-            this.captions.forEach((cap, i) => {
-              this.errorSelected.push('Entity Error')
-              this.completedState.push(false)
-              this.capTokens.push(null)
-              this.tokensDetailInfo.push([])
-              this.bbxes.push([])
-              axios
-                .get(this.$api.BASE_URL + 'tokenization?sentence=' + cap)
-                .then((response) => {
-                  this.capTokens[i] = response.data['tokens']
-                })
-                .then(() => {
-                  this.capTokens[i].forEach((token) => {
-                    let tokenDetail = {}
-                    tokenDetail['token'] = token
-                    tokenDetail['tokenModifyTo'] = undefined
-                    tokenDetail['provideAlterWords'] = false
-                    tokenDetail['alterWords'] = []
-                    this.tokensDetailInfo[i].push(tokenDetail)
+              // this.capTokens = [] //default null
+              // this.tokensDetailInfo = [] //default []
+              // this.bboxes = [] // default []
+
+              // this.captions.forEach((cap, i) => {
+              //   this.capTokens.push(null)
+              //   this.tokensDetailInfo.push([])
+              //   this.bboxes.push([])
+              // this.$set(this.capTokens, i, response.data['annotation_data']['capTokens'][i])
+              // this.capTokens[i] = response.data['annotation_data']['capTokens'][i]
+              // this.$set(this.tokensDetailInfo, i, response.data['annotation_data']['tokensDetailInfo'][i])
+              // this.capTokens[i].forEach((token, j) => {
+              //   this.tokensDetailInfo[i].push(
+              //     response.data['annotation_data']['tokensDetailInfo'][i][j]
+              //   )
+              // })
+              // this.$set(this.bboxes, i, response.data['annotation_data']['bboxes'][i])
+              // this.bboxes[i] = response.data['annotation_data']['bboxes'][i]
+              // })
+            } else {
+              this.modifiedCaptions =
+                response.data['annotation_data']['caps'].slice(0)
+              this.errorSelected = [] // default 'Entity Error'
+              this.completedState = [] // default false
+              this.capTokens = [] //default null
+              this.tokensDetailInfo = [] //default []
+              this.bboxes = [] // default []
+
+              this.captions.forEach((cap, i) => {
+                this.errorSelected.push('Entity Error')
+                this.completedState.push(false)
+                this.capTokens.push(null)
+                this.tokensDetailInfo.push([])
+                this.bboxes.push([])
+                axios
+                  .get(this.$api.BASE_URL + 'tokenization?sentence=' + cap)
+                  .then((response) => {
+                    this.capTokens[i] = response.data['tokens']
                   })
-                })
-                .then(() => {
-                  axios
-                    .get(
-                      this.$api.BASE_URL +
-                        'similar-substantive-tokens?sentence=' +
-                        cap
-                    )
-                    .then((response) => {
-                      response.data['similar_tokens_info'].forEach(
-                        (tokensInfo) => {
-                          this.tokensDetailInfo[i][tokensInfo['token_pos']][
-                            'provideAlterWords'
-                          ] = true
-                          this.tokensDetailInfo[i][tokensInfo['token_pos']][
-                            'alterWords'
-                          ] = tokensInfo['similar_tokens']
-                        }
-                      )
+                  .then(() => {
+                    this.capTokens[i].forEach((token) => {
+                      let tokenDetail = {}
+                      tokenDetail['token'] = token
+                      tokenDetail['tokenModifyTo'] = undefined
+                      tokenDetail['provideAlterWords'] = false
+                      tokenDetail['changeToNeg'] = false
+                      tokenDetail['alterWords'] = []
+                      this.tokensDetailInfo[i].push(tokenDetail)
                     })
-                })
-            })
+                  })
+                  .then(() => {
+                    axios
+                      .get(
+                        this.$api.BASE_URL +
+                          'similar-substantive-tokens?sentence=' +
+                          cap
+                      )
+                      .then((response) => {
+                        response.data['similar_tokens_info'].forEach(
+                          (tokensInfo) => {
+                            this.tokensDetailInfo[i][tokensInfo['token_pos']][
+                              'provideAlterWords'
+                            ] = true
+                            this.tokensDetailInfo[i][tokensInfo['token_pos']][
+                              'alterWords'
+                            ] = tokensInfo['similar_tokens']
+                          }
+                        )
+                      })
+                  })
+              })
+            }
           } else {
             // TO-DO show error message
           }
@@ -762,11 +930,13 @@ export default {
         })
     },
     saveData: function (getNextOne) {
-      if (this.completedState.indexOf(false) >= 0) {
-        this.promptSnackbar = true
-        this.prompt =
-          'Please save after you have accomplished all the caption annotations!'
-        return
+      if (getNextOne) {
+        if (this.completedState.indexOf(false) >= 0) {
+          this.promptSnackbar = true
+          this.prompt =
+            'Please save after you have accomplished all the caption annotations!'
+          return
+        }
       }
 
       let name = localStorage.getItem('name')
@@ -775,7 +945,9 @@ export default {
         img: this.imgName,
         errorSelected: this.errorSelected,
         modifiedCaptions: this.modifiedCaptions,
-        bbxes: this.bbxes,
+        capTokens: this.capTokens,
+        completedState: this.completedState,
+        bboxes: this.bboxes,
         tokensDetailInfo: this.tokensDetailInfo
       }
 
@@ -792,6 +964,7 @@ export default {
         })
         .then(() => {
           if (getNextOne) {
+            this.resetPageData()
             this.getData()
           }
         })
@@ -821,7 +994,7 @@ export default {
       ctx.strokeRect(10, 10, 100, 100)
     },
     clearRect: function () {
-      this.bbxes[this.capSelected].splice(0)
+      this.bboxes[this.capSelected].splice(0)
     },
     varIsUndefined: function (v) {
       return typeof v === 'undefined'
@@ -862,7 +1035,22 @@ export default {
         }
       }
     },
+    showAddAlterWordsDetailInfo: function (tokenIndex) {
+      if (this.addAlterWordsDetailInfo['capIndex'] !== this.capSelected) {
+        this.resetAddAlterWordsDetailInfo()
+        this.addAlterWordsDetailInfo['capIndex'] = this.capSelected
+        this.addAlterWordsDetailInfo['tokenIndex'] = tokenIndex
+        this.addAlterWordsDetailInfo['selected'] = true
+      } else {
+        if (this.addAlterWordsDetailInfo['selected']) {
+          this.resetAddAlterWordsDetailInfo()
+        } else {
+          this.addAlterWordsDetailInfo['selected'] = true
+        }
+      }
+    },
     changeAlterWord: function (alterIndex) {
+      this.resetAddAlterWordsDetailInfo()
       let capIndex = this.selectedDetailInfo['capIndex']
       let tokenIndex = this.selectedDetailInfo['tokenIndex']
       // click a previously chosen alternative word, select its state to unselected
@@ -932,6 +1120,7 @@ export default {
             modifiedCap.length
           )
       }
+      this.$forceUpdate()
     },
     addTokenToModifiedCap: function () {
       let inputValue = this.selectedDetailInfo['inputValue']
@@ -1026,6 +1215,22 @@ export default {
       this.resetExtraDetailInfo()
       this.resetSelectedDetailInfo(true)
     },
+    addTokenToAlterWords: function () {
+      let inputValue = this.addAlterWordsDetailInfo['inputValue']
+        .trim()
+        .replace(/\s+/gm, ' ')
+      if (inputValue === '') {
+        this.resetAddAlterWordsDetailInfo()
+        return
+      }
+      let inputTokens = inputValue.split(' ')
+      for (const inputToken of inputTokens) {
+        this.tokensDetailInfo[this.capSelected][
+          this.addAlterWordsDetailInfo['tokenIndex']
+        ]['alterWords'].push(inputToken)
+      }
+      this.resetAddAlterWordsDetailInfo()
+    },
     deleteTokenFromModifiedCap: function (capIndex, tokenIndex) {
       let tokensDetail = this.tokensDetailInfo[capIndex]
       let modifiedCap = this.modifiedCaptions[this.capSelected]
@@ -1087,21 +1292,27 @@ export default {
         this.selectedDetailInfo['tokenIndex'] = undefined
         this.selectedDetailInfo['inputToken'] = false
         this.selectedDetailInfo['inputValue'] = ''
-        this.selectedDetailInfo['inputErrorSnackbar'] = false
-        this.selectedDetailInfo['inputErrorMessage'] = ''
       } else {
         this.selectedDetailInfo['inputToken'] = false
         this.selectedDetailInfo['inputValue'] = ''
-        this.selectedDetailInfo['inputErrorSnackbar'] = false
-        this.selectedDetailInfo['inputErrorMessage'] = ''
       }
     },
     resetExtraDetailInfo: function () {
       this.extraDetailInfo['capIndex'] = undefined
       this.extraDetailInfo['selected'] = false
       this.extraDetailInfo['inputValue'] = ''
-      this.extraDetailInfo['inputErrorSnackbar'] = false
-      this.extraDetailInfo['inputErrorMessage'] = ''
+    },
+    resetAddAlterWordsDetailInfo: function () {
+      this.addAlterWordsDetailInfo['capIndex'] = undefined
+      this.addAlterWordsDetailInfo['tokenIndex'] = undefined
+      this.addAlterWordsDetailInfo['selected'] = false
+      this.addAlterWordsDetailInfo['inputValue'] = ''
+    },
+    resetPageData: function () {
+      this.capSelected = 0
+      this.resetSelectedDetailInfo(true)
+      this.resetExtraDetailInfo()
+      this.resetAddAlterWordsDetailInfo()
     },
     // tokenizeSentence: function (sentence, capSelected) {
     //   axios
