@@ -829,7 +829,6 @@ export default {
       axios
         .get(this.$api.BASE_URL + 'img-caps-pair?name=' + name)
         .then((response) => {
-          console.log(response.data)
           if (response.data['success']) {
             this.imgName = response.data['annotation_data']['img']
             this.imgUrl = response.data['annotation_data']['img_url']
