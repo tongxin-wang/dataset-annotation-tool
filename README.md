@@ -50,7 +50,7 @@
 
 |#|描述|演示|
 |---|---|----
-|1|<span style="display:inline-block;width:130px">**在句子中添加单词**</span>|[![add-token](https://files.catbox.moe/ud5zw8.gif "句中添加单词")](https://files.catbox.moe/ud5zw8.gif)
+|1|<span style="display:inline-block;width:130px">**在句子中添加单词**</span>|<a href="https://files.catbox.moe/ud5zw8.gif"><img src="https://files.catbox.moe/ud5zw8.gif" alt="add-token" title="句中添加单词" width=4000/></a>
 |2|<span style="display:inline-block;width:130px">**在句首添加单词**</span>|[![add-token-in-front-of-sentence](https://files.catbox.moe/chf155.gif "句首添加单词")](https://files.catbox.moe/chf155.gif)
 |3|<span style="display:inline-block;width:130px">**删除单词**</span>|[![delete-token](https://files.catbox.moe/i13tdq.gif "删除单词")](https://files.catbox.moe/i13tdq.gif)
 |4|<span style="display:inline-block;width:130px">**更改具有候选词，即绿色单词的状态为negative**（错误的词汇可以选择系统自动生成的候选词，如果觉得在其中没有合适的词汇，也可自行添加，如右图所示）</span>|[![update-token-case1](https://files.catbox.moe/i5iinz.gif "更新单词情况1")](https://files.catbox.moe/i5iinz.gif)
@@ -76,11 +76,7 @@
 |**Attribute Error(Action)**|[![annotation-example3](https://files.catbox.moe/e88x7u.gif "Attribute Error(Action)")](https://files.catbox.moe/e88x7u.gif)|<span style="display:inline-block;width:260px">将句中某一实体的动作改成错误的（一般更改动词），并在图像中框出`相关`区域的位置（偏抽象，各人理解不同，框选的区域也会出现差异）</span>
 |**Attribute Error(Position)**|[![annotation-example4](https://files.catbox.moe/w1gldy.gif "Attribute Error(Position)")](https://files.catbox.moe/w1gldy.gif)|<span style="display:inline-block;width:260px">将句中某一实体与另一实体的位置关系更改为错误的（可能涉及到句子结构的更改），并在图像中框出`所有相关实体`区域的位置</span>
 
-```
-还有一点需要注意的是，请尽量平衡各错误类型标注的数量比例。
-一般来说，位置属性错误出现的次数较少，当发现caption中存在对
-实体间位置的描述时，优先考虑标注Attribute Error(Position)。
-```
+> 还有一点需要注意的是，请尽量平衡各错误类型标注的数量比例。一般来说，位置属性错误出现的次数较少，当发现caption中存在对实体间位置的描述时，优先考虑标注Attribute Error(Position)。
 
 ### 本地运行
 
