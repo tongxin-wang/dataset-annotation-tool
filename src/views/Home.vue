@@ -930,6 +930,15 @@ export default {
     },
     saveData: function (getNextOne) {
       if (getNextOne) {
+        // check if there is a image of an unselected region
+        for (let i = 0; i < this.bboxes.length; i++) {
+          if(this.bboxes[i].length === 0) {
+            this.promptSnackbar = true
+            this.prompt = 'There are still images not annotated with bboxes, please check again!'
+            return
+          }
+        }
+
         if (this.completedState.indexOf(false) >= 0) {
           this.promptSnackbar = true
           this.prompt =
